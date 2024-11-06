@@ -1,3 +1,37 @@
+#!/bin/sh
+
+wget -O loader.sh https://raw.githubusercontent.com/DiscoverMyself/Ramanode-Guides/main/loader.sh && chmod +x loader.sh && ./loader.sh
+sleep 4
+
+sudo apt-get update && sudo apt-get upgrade -y
+clear
+
+echo "Installing dependencies..."
+npm install --save-dev hardhat
+npm install dotenv
+npm install @swisstronik/utils
+npm install @openzeppelin/contracts
+echo "Installation completed."
+
+echo "Creating a Hardhat project..."
+npx hardhat
+
+rm -f contracts/Lock.sol
+echo "Lock.sol removed."
+
+echo "Hardhat project created."
+
+echo "Installing Hardhat toolbox..."
+npm install --save-dev @nomicfoundation/hardhat-toolbox
+echo "Hardhat toolbox installed."
+
+echo "Creating .env file..."
+read -p "Enter your private key: " PRIVATE_KEY
+echo "PRIVATE_KEY=$PRIVATE_KEY" > .env
+echo ".env file created."
+
+echo "Configuring Hardhat..."
+cat <<EOL > hardhat.config.js
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
@@ -6,7 +40,7 @@ module.exports = {
     networks: {
         swisstronik: {
               url: "https://json-rpc.testnet.swisstronik.com/",
-                    accounts: [`0x${process.env.PRIVATE_KEY}`],
+                    accounts: [\`0x\${process.env.PRIVATE_KEY}\`],
                         },
                           },
                           };
@@ -28,7 +62,7 @@ module.exports = {
 
                           contract TestNFT is ERC721, ERC721Burnable {
                               constructor()
-                                      ERC721("","")
+                                      ERC721("$NFT_NAME","$NFT_SYMBOL")
                                           {}
 
                                               function safeMint(address to, uint256 tokenId) public {
@@ -53,7 +87,7 @@ module.exports = {
                                                               await contract.waitForDeployment();
                                                                 const deployedContract = await contract.getAddress();
                                                                   fs.writeFileSync("contract.txt", deployedContract);
-                                                                    console.log(`Contract deployed to ${deployedContract}`);
+                                                                    console.log(\`Contract deployed to \${deployedContract}\`);
                                                                     }
 
                                                                     main().catch((error) => {
@@ -97,7 +131,7 @@ module.exports = {
                                                                                                                             0
                                                                                                                               );
                                                                                                                                 await safeMintTx.wait();
-                                                                                                                                  console.log("Transaction Receipt: ", `Minting NFT has been success! Transaction hash: https://explorer-evm.testnet.swisstronik.com/tx/${safeMintTx.hash}`);
+                                                                                                                                  console.log("Transaction Receipt: ", \`Minting NFT has been success! Transaction hash: https://explorer-evm.testnet.swisstronik.com/tx/\${safeMintTx.hash}\`);
                                                                                                                                   }
 
                                                                                                                                   main().catch((error) => {
